@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require "beam_up"
+require "beam_up/cli"
+
+BeamUp::CLI.start(ARGV)
