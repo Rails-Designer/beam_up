@@ -1,3 +1,3 @@
-module beam_up
+module BeamUp
   VERSION = "0.5.0"
 end
