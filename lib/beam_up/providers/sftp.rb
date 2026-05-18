@@ -50,7 +50,7 @@ module BeamUp
           url: "sftp://#{@configuration.host}#{@configuration.remote_path}"
         )
       rescue LoadError
-        raise ConfigurationError, "SFTP requires net-ssh and net-sftp gems. Install with: gem install net-ssh net-sftp (or add to Gemfile)"
+        raise ConfigurationError, "SFTP requires net-sftp gem. Install with: gem install net-sftp (or add to Gemfile)"
       rescue => error
         Result.new(provider: "SFTP", error: error.message)
       end

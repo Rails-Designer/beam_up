@@ -1,6 +1,6 @@
 # Beam Up
 
-Static site deployment CLI supporting multiple providers.
+Static site deployment CLI supporting multiple providers. Just run `beam_up ./output`.
 
 
 ## Installation
@@ -13,7 +13,7 @@ gem install beam_up
 
 ## Configuration
 
-Create a config file interactively:
+Create a config file:
 ```bash
 beam_up init netlify
 ```
@@ -21,7 +21,7 @@ beam_up init netlify
 Or manually create `.beam_up.yml` (or `config/beam_up.yml`):
 ```yaml
 provider: netlify
-# path: ./output/  # optional
+# path: ./output  # optional
 netlify:
   api_token: your_token_here
   project_id: your_project_id
