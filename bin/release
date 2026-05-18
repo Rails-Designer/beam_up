@@ -20,7 +20,7 @@ if [[ "$VERSION" =~ ^(major|minor|patch)$ ]]; then
   esac
 fi
 
-printf "module beam_up\n  VERSION = \"$VERSION\"\nend\n" > ./lib/beam_up/version.rb
+printf "module BeamUp\n  VERSION = \"$VERSION\"\nend\n" > ./lib/beam_up/version.rb
 
 bundle
 
