@@ -13,6 +13,8 @@ module BeamUp
       Dir.chdir(@temporary_directory)
 
       BeamUp.instance_variable_set(:@configuration, nil)
+      BeamUp::Core.instance_variable_set(:@configuration, nil)
+      BeamUp::Core.instance_variable_set(:@config_file, nil)
     end
 
     def teardown
@@ -20,6 +22,8 @@ module BeamUp
       FileUtils.rm_rf(@temporary_directory)
 
       BeamUp.instance_variable_set(:@configuration, nil)
+      BeamUp::Core.instance_variable_set(:@configuration, nil)
+      BeamUp::Core.instance_variable_set(:@config_file, nil)
     end
 
     def test_init_creates_config_file
