@@ -10,6 +10,7 @@ module BeamUp
     def initialize(arguments)
       @arguments = arguments
       @provider = nil
+      @config_file = nil
     end
 
     def run
@@ -81,7 +82,7 @@ module BeamUp
     def deploy
       input = parse_options
 
-      beamed = BeamUp.deploy! input, provider: @provider
+      beamed = BeamUp.deploy! input, provider: @provider, config_file: @config_file
 
       puts beamed.message
       puts "Deploy ID: #{beamed.deploy_id}" if beamed.deploy_id
@@ -150,11 +151,13 @@ module BeamUp
           beam_up [FOLDER]                      # Deploy using .beam_up.yml config
           beam_up [FOLDER] --to PROVIDER        # Deploy with provider override
           beam_up [FOLDER] --provider PROVIDER  # Alias for --to
+          beam_up [FOLDER] --config FILE        # Use a specific config file
 
         Examples:
           beam_up init netlify
           beam_up ./output
           beam_up ./output --to aws_s3
+          beam_up ./output --config /path/to/config.yml
       HELP
 
       exit
@@ -172,6 +175,10 @@ module BeamUp
 
         options.on("--to PROVIDER", "Alias for --provider") do |value|
           @provider = value
+        end
+
+        options.on("--config FILE", "Use a specific config file") do |value|
+          @config_file = value
         end
 
         options.on("--help", "-h", "Show this help") do

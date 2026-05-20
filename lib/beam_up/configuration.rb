@@ -2,7 +2,7 @@
 
 module BeamUp
   class Configuration
-    attr_accessor :provider, :path, :before_actions, :after_actions, :timeout
+    attr_accessor :provider, :path, :before_actions, :after_actions, :timeout, :config_file
 
     DEFAULT_TIMEOUT = 300  # 5 minutes
 

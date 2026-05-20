@@ -24,8 +24,12 @@ module BeamUp
   class << self
     def configure(&block) = Core.configure(&block)
 
-    def configuration = Core.configuration
+    def config_file=(path)
+      Core.config_file = path
+    end
 
-    def deploy!(path = nil, provider: nil, to: nil) = Core.deploy!(path, provider: (to || provider)&.to_s)
+    def configuration(config_file: nil) = Core.configuration(config_file: config_file)
+
+    def deploy!(path = nil, provider: nil, to: nil, config_file: nil) = Core.deploy!(path, provider: (to || provider)&.to_s, config_file: config_file)
   end
 end

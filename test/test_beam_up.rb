@@ -12,6 +12,7 @@ class BeamUpTest < Minitest::Test
     Dir.chdir(@temporary_directory)
 
     BeamUp::Core.instance_variable_set(:@configuration, nil)
+    BeamUp::Core.instance_variable_set(:@config_file, nil)
   end
 
   def teardown
@@ -19,6 +20,7 @@ class BeamUpTest < Minitest::Test
     FileUtils.rm_rf(@temporary_directory)
 
     BeamUp::Core.instance_variable_set(:@configuration, nil)
+    BeamUp::Core.instance_variable_set(:@config_file, nil)
   end
 
   def test_version_constant_exists
@@ -202,5 +204,69 @@ class BeamUpTest < Minitest::Test
 
     assert_includes error.message, "Before action failed"
     refute File.exist?("./beamed/index.html")
+  end
+
+  def test_configuration_loads_from_custom_config_file
+    custom_config_path = File.join(@temporary_directory, "custom.yml")
+    File.write(custom_config_path, YAML.dump({
+      "provider" => "netlify",
+      "path" => "./output",
+      "netlify" => {"api_token" => "custom_token", "project_id" => "custom_site"}
+    }))
+
+    config = BeamUp.configuration(config_file: custom_config_path)
+
+    assert_equal "netlify", config.provider
+    assert_equal "custom_token", config.netlify.api_token
+  end
+
+  def test_configuration_ignores_default_files_when_config_file_specified
+    File.write(".beam_up.yml", YAML.dump({
+      "provider" => "netlify",
+      "netlify" => {"api_token" => "default_token"}
+    }))
+
+    custom_config_path = File.join(@temporary_directory, "custom.yml")
+    File.write(custom_config_path, YAML.dump({
+      "provider" => "bunny",
+      "bunny" => {"storage_zone_password" => "custom_password"}
+    }))
+
+    config = BeamUp.configuration(config_file: custom_config_path)
+
+    assert_equal "bunny", config.provider
+  end
+
+  def test_configure_allows_setting_config_file_path
+    custom_config_path = File.join(@temporary_directory, "custom.yml")
+    File.write(custom_config_path, YAML.dump({
+      "provider" => "netlify",
+      "netlify" => {"api_token" => "configured_token"}
+    }))
+
+    BeamUp.config_file = custom_config_path
+
+    config = BeamUp.configuration
+
+    assert_equal "netlify", config.provider
+    assert_equal "configured_token", config.netlify.api_token
+  end
+
+  def test_deploy_with_custom_config_file
+    custom_config_path = File.join(@temporary_directory, "deploy_config.yml")
+    File.write(custom_config_path, YAML.dump({
+      "provider" => "transporter",
+      "path" => "./output",
+      "transporter" => {"target_directory" => "./beamed"}
+    }))
+
+    FileUtils.mkdir_p("./output")
+    File.write("./output/index.html", "<html></html>")
+
+    beamed = BeamUp.deploy!("./output", config_file: custom_config_path)
+
+    assert beamed.success?
+    assert_equal "Transporter", beamed.provider
+    assert File.exist?("./beamed/index.html")
   end
 end

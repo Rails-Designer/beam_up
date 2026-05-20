@@ -5,16 +5,23 @@ require "yaml"
 module BeamUp
   class Core
     class << self
-      def configure
+      def configure(&block)
         yield(configuration)
       end
 
-      def configuration
-        @configuration ||= configuration_file || raise(ConfigurationError, "No .beam_up.yml found. Run `beam_up init PROVIDER` to create one.")
+      attr_writer :config_file
+
+      def configuration(config_file: nil)
+        @configuration ||= begin
+          custom_path = config_file || @config_file || ((@configuration&.config_file && File.exist?(@configuration.config_file)) ? @configuration.config_file : nil)
+          config = custom_path ? configuration_file(custom_path) : configuration_file
+
+          config || raise(ConfigurationError, "No .beam_up.yml found. Run `beam_up init PROVIDER` to create one.")
+        end
       end
 
-      def deploy!(path = nil, provider: nil)
-        config = configuration_file
+      def deploy!(path = nil, provider: nil, config_file: nil)
+        config = configuration(config_file: config_file)
         config.provider = provider if provider
 
         deploy_path = path || config.path || raise(ConfigurationError, "No path specified")
@@ -33,9 +40,10 @@ module BeamUp
 
       private
 
-      def configuration_file
-        file = ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
-        return nil unless file
+      def configuration_file(custom_path = nil)
+        file = custom_path || ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
+
+        return nil unless file && File.exist?(file)
 
         data = YAML.safe_load_file(file)
 
