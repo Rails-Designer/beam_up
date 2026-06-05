@@ -8,8 +8,12 @@ module BeamUp
       def deploy!(path)
         @path = path
 
-        files_to_deploy.each do |file|
+        files = files_to_deploy
+        BeamUp.progress&.start(type: :files, total: files.count)
+
+        files.each do |file|
           upload file.delete_prefix("#{@path}/"), file
+          BeamUp.progress&.tick
         end
 
         Result.new(
@@ -19,6 +23,8 @@ module BeamUp
         )
       rescue => error
         Result.new(provider: provider_name, error: error.message)
+      ensure
+        BeamUp.progress&.finish
       end
 
       private

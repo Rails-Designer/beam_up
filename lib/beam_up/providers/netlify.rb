@@ -62,7 +62,9 @@ module BeamUp
         required_shas = response["required"] || []
         return if required_shas.empty?
 
-        required_shas.each.with_index(1) do |sha, index|
+        BeamUp.progress&.start(type: :files, total: required_shas.count)
+
+        required_shas.each do |sha|
           file_path = file_map_from(files)[sha]
           next if file_path.nil? || file_path.empty?
 
@@ -70,7 +72,10 @@ module BeamUp
           escaped_path = CGI.escape(relative_path.delete_prefix("/"))
 
           put("/deploys/#{response["id"]}/files/#{escaped_path}", File.read(file_path))
+          BeamUp.progress&.tick
         end
+      ensure
+        BeamUp.progress&.finish
       end
 
       def message

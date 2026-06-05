@@ -82,12 +82,14 @@ module BeamUp
     def deploy
       input = parse_options
 
-      beamed = BeamUp.deploy! input, provider: @provider, config_file: @config_file
+      BeamUp.with_progress do
+        beamed = BeamUp.deploy! input, provider: @provider, config_file: @config_file
 
-      puts beamed.message
-      puts "Deploy ID: #{beamed.deploy_id}" if beamed.deploy_id
+        puts beamed.message
+        puts "Deploy ID: #{beamed.deploy_id}" if beamed.deploy_id
 
-      exit(1) unless beamed.success?
+        exit(1) unless beamed.success?
+      end
     end
 
     def scotty

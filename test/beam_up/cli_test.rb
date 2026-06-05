@@ -174,7 +174,7 @@ module BeamUp
         cli.run
       end
 
-      assert_includes output, "Energizing"
+      assert_includes output, "Transport complete"
       assert File.exist?("./deployed/index.html")
     end
 
@@ -214,7 +214,7 @@ module BeamUp
         cli.run
       end
 
-      assert_includes output, "Matter stream detected"
+      assert_includes output, "Transport complete"
       assert File.exist?("./beamed/index.html")
     end
 
@@ -234,7 +234,7 @@ module BeamUp
         cli.run
       end
 
-      assert_includes output, "Matter stream detected"
+      assert_includes output, "Transport complete"
       assert File.exist?("./beamed/index.html")
     end
 
