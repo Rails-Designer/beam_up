@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "yaml"
+require "tty-prompt"
 
 module BeamUp
   class Core
@@ -50,7 +51,15 @@ module BeamUp
           raise ConfigurationError, "Provider '#{provider}' already configured in #{config_file}" if data.key?(provider)
         end
 
-        configured_values = PROVIDERS[provider]::Config.config_keys.to_h { |key| [key, values[key].to_s] }
+        config_keys = PROVIDERS[provider]::Config.config_keys
+
+        if values.empty? && $stdout.tty? && !ENV["TTY_TEST"]
+          prompt = TTY::Prompt.new
+
+          values = config_keys.to_h { |key| [key, prompt.ask("#{key}:") { it.required false }.to_s] }
+        end
+
+        configured_values = config_keys.to_h { [it, values[it].to_s] }
 
         if File.exist?(config_file)
           section = YAML.dump({provider => configured_values}, indent: 2, line_width: 80).sub(/^---\n/, "")
