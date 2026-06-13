@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    beam_up (0.6.0)
+    beam_up (0.7.0)
       aws-sdk-s3 (~> 1.0)
       rexml (~> 3.0)
       rubyzip (~> 3.0)
@@ -145,7 +145,7 @@ CHECKSUMS
   aws-sdk-s3 (1.213.0) sha256=af596ccf544582406db610e95cc9099276eaf03142f57a2f30f76940e598e50d
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
-  beam_up (0.6.0)
+  beam_up (0.7.0)
   bigdecimal (4.0.1) sha256=8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7
   date (3.5.1) sha256=750d06384d7b9c15d562c76291407d89e368dda4d4fff957eb94962d325a0dc0
   debug (1.11.1) sha256=2e0b0ac6119f2207a6f8ac7d4a73ca8eb4e440f64da0a3136c30343146e952b6
