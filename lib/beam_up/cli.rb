@@ -31,20 +31,27 @@ module BeamUp
     def init
       provider_name = @arguments.shift&.downcase
 
-      if provider_name.nil? || !PROVIDERS.key?(provider_name)
+      if provider_name.nil?
+        prompt = TTY::Prompt.new
+
+        provider_name = prompt.select(
+          "Choose provider?",
+          PROVIDERS.keys.reject { it == "transporter" }.sort
+        )
+      elsif !PROVIDERS.key?(provider_name)
         puts "Available providers:"
 
         PROVIDERS.keys.reject { it == "transporter" }.sort.each { puts "  - #{it}" }
-
+    
         exit(1)
       end
 
       path = BeamUp.init!(provider_name)
-
+    
       puts "Configured #{provider_name} in #{path}"
     rescue ConfigurationError => error
       puts error.message
-
+    
       exit(1)
     end
 
