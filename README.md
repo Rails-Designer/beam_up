@@ -13,12 +13,16 @@ gem install beam_up
 
 ## Configuration
 
-Create a config file:
+Create a config file interactively:
 ```bash
 beam_up init netlify
+# api_token:
+# project_id:
 ```
 
-Or manually create `.beam_up.yml` (or `config/beam_up.yml`):
+Or specify values programmatically (see [Usage from Ruby](#usage-from-ruby) for details).
+
+You can also manually create `.beam_up.yml` (or `config/beam_up.yml`):
 ```yaml
 provider: netlify
 # path: ./output  # optional
@@ -61,6 +65,10 @@ beam_up ./output --provider bunny
 ```ruby
 require "beam_up"
 
+# Configure a provider interactively
+BeamUp.init! "netlify"
+
+# Deploy
 BeamUp.deploy! "./output"
 
 # Deploy with provider override
@@ -76,6 +84,7 @@ Run commands before and after deployment:
 
 ```yaml
 provider: netlify
+
 before_actions:
   - npm run build
 after_actions:

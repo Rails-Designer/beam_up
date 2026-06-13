@@ -1,6 +1,5 @@
 require "optparse"
 require "yaml"
-require "tty-prompt"
 
 module BeamUp
   class CLI
@@ -40,16 +39,7 @@ module BeamUp
         exit(1)
       end
 
-      keys = PROVIDERS[provider_name]::Config.config_keys
-      values = if $stdout.tty? && !ENV["TTY_TEST"]
-        prompt = TTY::Prompt.new
-
-        keys.to_h { |key| [key, prompt.ask("#{key}:") { it.required false }.to_s] }
-      else
-        keys.to_h { |key| [key, ""] }
-      end
-
-      path = BeamUp.init!(provider_name, values: values)
+      path = BeamUp.init!(provider_name)
 
       puts "Configured #{provider_name} in #{path}"
     rescue ConfigurationError => error
