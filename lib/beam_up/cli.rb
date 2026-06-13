@@ -1,5 +1,6 @@
 require "optparse"
 require "yaml"
+require "tty-prompt"
 
 module BeamUp
   class CLI
@@ -31,7 +32,9 @@ module BeamUp
     def init
       provider_name = @arguments.shift&.downcase
 
-      if provider_name.nil? || !PROVIDERS.key?(provider_name)
+      provider_name ||= choose_provider
+
+      unless PROVIDERS.key?(provider_name)
         puts "Available providers:"
 
         PROVIDERS.keys.reject { it == "transporter" }.sort.each { puts "  - #{it}" }
@@ -48,11 +51,19 @@ module BeamUp
       exit(1)
     end
 
+    def choose_provider
+      providers = PROVIDERS.keys.reject { it == "transporter" }.sort
+
+      return nil unless $stdout.tty? && !ENV["TTY_TEST"]
+
+      TTY::Prompt.new.select("Provider:", providers)
+    end
+
     def deploy_or_help
       if File.exist?(".beam_up.yml") || File.exist?("config/beam_up.yml")
         deploy
       else
-        puts "No .beam_up.yml found. Run `beam_up init PROVIDER` to get started"
+        puts "No .beam_up.yml found. Run `beam_up init` to get started"
         puts
 
         help
@@ -129,7 +140,7 @@ module BeamUp
     def help
       puts <<~HELP
         Usage:
-          beam_up init PROVIDER                 # Initialize config file for provider
+          beam_up init [PROVIDER]               # Initialize config file for provider
           beam_up [FOLDER]                      # Deploy using .beam_up.yml config
           beam_up [FOLDER] --to PROVIDER        # Deploy with provider override
           beam_up [FOLDER] --provider PROVIDER  # Alias for --to

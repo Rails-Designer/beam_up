@@ -77,6 +77,20 @@ module BeamUp
       assert_includes output, "Available providers:"
     end
 
+    def test_init_without_provider_can_use_prompt_selection
+      cli = CLI.new(["init"])
+      cli.define_singleton_method(:choose_provider) { "netlify" }
+
+      assert_output(/Configured netlify in/) do
+        cli.run
+      end
+
+      configuration = YAML.safe_load_file(".beam_up.yml")
+
+      assert_equal "netlify", configuration["provider"]
+      assert configuration["netlify"].key?("api_token")
+    end
+
     def test_init_appends_provider_to_existing_config
       File.write(".beam_up.yml", YAML.dump({
         "provider" => "netlify",
@@ -246,7 +260,7 @@ module BeamUp
       end
 
       assert_includes output, "Usage:"
-      assert_includes output, "beam_up init PROVIDER"
+      assert_includes output, "beam_up init [PROVIDER]"
       assert_includes output, "beam_up [FOLDER]"
       assert_includes output, "--provider"
       assert_includes output, "--to"
