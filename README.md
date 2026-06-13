@@ -85,13 +85,14 @@ Run commands before and after deployment:
 ```yaml
 provider: netlify
 
+netlify:
+  api_token: your_token_here
+  project_id: your_project_id
+
 before_actions:
   - npm run build
 after_actions:
   - echo "Deployment complete ✨"
-netlify:
-  api_token: your_token_here
-  project_id: your_project_id
 ```
 
 If a `before_action` fails, deployment is cancelled.
@@ -109,6 +110,7 @@ Configuration:
 
 ```yaml
 provider: sftp
+
 sftp:
   host: your-server.com
   username: deploy_user
