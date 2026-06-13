@@ -1,6 +1,6 @@
 # Beam Up
 
-Static site deployment CLI supporting multiple providers. Just run `beam_up ./output`.
+Static site deployment CLI supporting [multiple providers](#supported-providers). Just run `beam_up ./output`.
 
 
 ## Installation
