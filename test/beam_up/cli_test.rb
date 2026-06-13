@@ -45,7 +45,7 @@ module BeamUp
     end
 
     def test_init_with_bunny_provider
-      CLI.new(["init", "bunny"]).run
+      capture_io { CLI.new(["init", "bunny"]).run }
 
       configuration = YAML.safe_load_file(".beam_up.yml")
 
