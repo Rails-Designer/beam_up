@@ -29,7 +29,7 @@ module BeamUp
     def test_init_creates_config_file
       cli = CLI.new(["init", "netlify"])
 
-      assert_output(/Created \.beam_up\.yml with netlify provider/) do
+      assert_output(/Configured netlify in/) do
         cli.run
       end
 
@@ -84,7 +84,7 @@ module BeamUp
         "netlify" => {"api_token" => "existing_token", "project_id" => "existing_site"}
       }))
 
-      assert_output(/Updated \.beam_up\.yml with bunny provider/) do
+      assert_output(/Configured bunny in/) do
         CLI.new(["init", "bunny"]).run
       end
 
@@ -107,7 +107,7 @@ module BeamUp
       config_content_before = File.read(".beam_up.yml")
       assert_includes config_content_before, "# path: ./output"
 
-      assert_output(/Updated \.beam_up\.yml with statichost provider/) do
+      assert_output(/Configured statichost in/) do
         CLI.new(["init", "statichost"]).run
       end
 
@@ -131,7 +131,7 @@ module BeamUp
         "bunny" => {"storage_zone_password" => "dot_token", "storage_zone_name" => "dot_zone", "region" => "dot_region"}
       }))
 
-      assert_output(/Updated config\/beam_up\.yml with bunny provider/) do
+      assert_output(/Configured bunny in config\/beam_up\.yml/) do
         CLI.new(["init", "bunny"]).run
       end
 

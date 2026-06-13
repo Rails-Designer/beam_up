@@ -38,6 +38,32 @@ module BeamUp
         result
       end
 
+      def init!(provider, config_file: nil)
+        raise ConfigurationError, "Unknown provider: #{provider}" unless PROVIDERS.key?(provider)
+
+        config_file ||= ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
+        config_file ||= ".beam_up.yml"
+
+        if File.exist?(config_file)
+          data = YAML.safe_load_file(config_file) || {}
+
+          raise ConfigurationError, "Provider '#{provider}' already configured in #{config_file}" if data.key?(provider)
+
+          section = YAML.dump({provider => PROVIDERS[provider]::Config.config_keys.to_h { [it, ""] }}, indent: 2, line_width: 80).sub(/^---\n/, "")
+          File.write(config_file, File.read(config_file) + "\n" + section)
+        else
+          yaml = YAML.dump({
+            "provider" => provider,
+            "path" => nil,
+            provider => PROVIDERS[provider]::Config.config_keys.to_h { |key| [key, ""] }
+          }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder")
+
+          File.write(config_file, yaml)
+        end
+
+        config_file
+      end
+
       private
 
       def configuration_file(custom_path = nil)

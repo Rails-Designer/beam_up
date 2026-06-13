@@ -39,33 +39,13 @@ module BeamUp
         exit(1)
       end
 
-      provider_config_class = PROVIDERS[provider_name]::Config
-      config_keys = provider_config_class.config_keys
-      config_file = ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
+      path = BeamUp.init!(provider_name)
 
-      if config_file
-        existing_config = YAML.safe_load_file(config_file) || {}
+      puts "Configured #{provider_name} in #{path}"
+    rescue ConfigurationError => error
+      puts error.message
 
-        if existing_config.key?(provider_name)
-          puts "Provider '#{provider_name}' already configured in #{config_file}"
-
-          exit(1)
-        end
-
-        provider_section = YAML.dump({provider_name => config_keys.to_h { [it, ""] }}, indent: 2, line_width: 80).sub(/^---\n/, "")
-        File.write(config_file, File.read(config_file) + "\n" + provider_section)
-
-        puts "Updated #{config_file} with #{provider_name} provider"
-      else
-        configuration = YAML.dump({
-          "provider" => provider_name,
-          "path" => nil,
-          provider_name => config_keys.to_h { |key| [key, ""] }
-        }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder")
-
-        File.write(".beam_up.yml", configuration)
-        puts "Created .beam_up.yml with #{provider_name} provider"
-      end
+      exit(1)
     end
 
     def deploy_or_help
