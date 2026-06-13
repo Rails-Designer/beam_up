@@ -16,6 +16,7 @@ module BeamUp
     "hetzner" => Providers::Hetzner,
     "neocities" => Providers::Neocities,
     "netlify" => Providers::Netlify,
+    "seal_static" => Providers::SealStatic,
     "sftp" => Providers::SFTP,
     "statichost" => Providers::Statichost,
     "transporter" => Providers::Transporter

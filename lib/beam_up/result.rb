@@ -2,13 +2,14 @@
 
 module BeamUp
   class Result
-    attr_reader :deploy_id, :error, :provider
+    attr_reader :deploy_id, :error, :provider, :api_key
 
-    def initialize(provider:, deploy_id: nil, url: nil, error: nil)
+    def initialize(provider:, deploy_id: nil, url: nil, error: nil, api_key: nil)
       @provider = provider
       @deploy_id = deploy_id
       @url = url
       @error = error
+      @api_key = api_key
     end
 
     def success? = @error.nil?
