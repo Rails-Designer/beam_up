@@ -51,6 +51,7 @@ beam_up ./output --provider bunny
 - hetzner
 - neocities
 - netlify
+- [Seal Static](https://sealstatic.com/)
 - sftp
 - statichost
 
