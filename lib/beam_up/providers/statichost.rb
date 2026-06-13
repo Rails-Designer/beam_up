@@ -30,6 +30,7 @@ module BeamUp
         @path = path
 
         zipped_file = create_zip path
+        BeamUp.progress&.start(type: :bytes, total: zipped_file.size)
         response = upload zipped_file
 
         Result.new(
@@ -41,6 +42,7 @@ module BeamUp
         Result.new(provider: "Statichost", error: error.message)
       ensure
         zipped_file&.close!
+        BeamUp.progress&.finish
       end
 
       private

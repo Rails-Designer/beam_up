@@ -28,6 +28,9 @@ module BeamUp
       def deploy!(path)
         @path = path
 
+        files = files_to_deploy
+        BeamUp.progress&.start(type: :files, total: files.count)
+
         upload_files
 
         Result.new(
@@ -37,6 +40,8 @@ module BeamUp
         )
       rescue => error
         Result.new(provider: "Neocities", error: error.message)
+      ensure
+        BeamUp.progress&.finish
       end
 
       private

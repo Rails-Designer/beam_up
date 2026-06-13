@@ -5,6 +5,7 @@ require "beam_up/errors"
 require "beam_up/providers"
 require "beam_up/configuration"
 require "beam_up/result"
+require "beam_up/progress"
 require "beam_up/core"
 require "beam_up/cli"
 
@@ -23,6 +24,18 @@ module BeamUp
   }
 
   class << self
+    attr_accessor :progress
+
+    def with_progress
+      self.progress = Progress.new
+
+      yield
+    ensure
+      progress&.finish
+
+      self.progress = nil
+    end
+
     def configure(&block) = Core.configure(&block)
 
     def config_file=(path)

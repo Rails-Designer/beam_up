@@ -38,9 +38,13 @@ module BeamUp
         }
         options[:keys] = [@configuration.key] if @configuration.key
 
+        files = files_to_deploy
+        BeamUp.progress&.start(type: :files, total: files.count)
+
         Net::SFTP.start(@configuration.host, @configuration.username, options) do |sftp|
-          files_to_deploy.each do |file|
+          files.each do |file|
             upload sftp, file
+            BeamUp.progress&.tick
           end
         end
 
@@ -53,6 +57,8 @@ module BeamUp
         raise ConfigurationError, "SFTP requires net-sftp gem. Install with: gem install net-sftp (or add to Gemfile)"
       rescue => error
         Result.new(provider: "SFTP", error: error.message)
+      ensure
+        BeamUp.progress&.finish
       end
 
       private

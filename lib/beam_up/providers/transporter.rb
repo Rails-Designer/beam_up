@@ -24,8 +24,7 @@ module BeamUp
         @path = path
         files = files_to_deploy
 
-        puts "Energizing… 🚀"
-        puts "Matter stream detected: #{files.length} files"
+        BeamUp.progress&.start(type: :files, total: files.length)
 
         FileUtils.mkdir_p(@configuration.target_directory)
 
@@ -36,7 +35,7 @@ module BeamUp
           FileUtils.mkdir_p(File.dirname(target_path))
           FileUtils.cp(file, target_path)
 
-          puts "  Beaming: #{relative_path}"
+          BeamUp.progress&.tick
         end
 
         puts "Transport complete. Files materialized at: #{@configuration.target_directory}"
@@ -48,6 +47,8 @@ module BeamUp
         )
       rescue => error
         Result.new(provider: "Transporter", error: error.message)
+      ensure
+        BeamUp.progress&.finish
       end
     end
   end
