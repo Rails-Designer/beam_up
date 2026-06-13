@@ -45,5 +45,7 @@ module BeamUp
     def configuration(config_file: nil) = Core.configuration(config_file: config_file)
 
     def deploy!(path = nil, provider: nil, to: nil, config_file: nil) = Core.deploy!(path, provider: (to || provider)&.to_s, config_file: config_file)
+
+    def init!(provider, config_file: nil) = Core.init!(provider, config_file: config_file)
   end
 end
