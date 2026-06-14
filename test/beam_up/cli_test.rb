@@ -29,7 +29,7 @@ module BeamUp
     def test_init_creates_config_file
       cli = CLI.new(["init", "netlify"])
 
-      assert_output(/Configured netlify in/) do
+      assert_output(/Configuration saved to/) do
         cli.run
       end
 
@@ -62,7 +62,8 @@ module BeamUp
         assert_raises(SystemExit) { cli.run }
       end
 
-      assert_includes output, "Available providers:"
+      assert_includes output, "Unknown provider: invalid_provider"
+      assert_includes output, "Available:"
       assert_includes output, "aws_s3"
       assert_includes output, "netlify"
     end
@@ -74,7 +75,21 @@ module BeamUp
         assert_raises(SystemExit) { cli.run }
       end
 
-      assert_includes output, "Available providers:"
+      assert_includes output, "No provider specified"
+      assert_includes output, "Available:"
+      assert_includes output, "aws_s3"
+      assert_includes output, "transporter"
+    end
+
+    def test_provider_list_includes_transporter
+      assert_includes Core.send(:provider_list), "transporter"
+    end
+
+    def test_selectable_providers_exclude_transporter
+      selectable = Core.send(:provider_list).reject { it == "transporter" }
+
+      refute_includes selectable, "transporter"
+      assert_equal "seal_static", selectable.first
     end
 
     def test_init_appends_provider_to_existing_config
@@ -84,7 +99,7 @@ module BeamUp
         "netlify" => {"api_token" => "existing_token", "project_id" => "existing_site"}
       }))
 
-      assert_output(/Configured bunny in/) do
+      assert_output(/Configuration saved to/) do
         CLI.new(["init", "bunny"]).run
       end
 
@@ -107,7 +122,7 @@ module BeamUp
       config_content_before = File.read(".beam_up.yml")
       assert_includes config_content_before, "# path: ./output"
 
-      assert_output(/Configured statichost in/) do
+      assert_output(/Configuration saved to/) do
         CLI.new(["init", "statichost"]).run
       end
 
@@ -131,7 +146,7 @@ module BeamUp
         "bunny" => {"storage_zone_password" => "dot_token", "storage_zone_name" => "dot_zone", "region" => "dot_region"}
       }))
 
-      assert_output(/Configured bunny in config\/beam_up\.yml/) do
+      assert_output(/Configuration saved to/) do
         CLI.new(["init", "bunny"]).run
       end
 
@@ -246,7 +261,7 @@ module BeamUp
       end
 
       assert_includes output, "Usage:"
-      assert_includes output, "beam_up init PROVIDER"
+      assert_includes output, "beam_up init [PROVIDER]"
       assert_includes output, "beam_up [FOLDER]"
       assert_includes output, "--provider"
       assert_includes output, "--to"
@@ -270,7 +285,7 @@ module BeamUp
       end
 
       assert_includes output, "No .beam_up.yml found"
-      assert_includes output, "beam_up init"
+      assert_includes output, "beam_up init [PROVIDER]"
     end
 
     def test_unknown_command_treated_as_folder_path
