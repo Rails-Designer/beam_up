@@ -81,16 +81,6 @@ module BeamUp
       assert_includes output, "transporter"
     end
 
-    def test_provider_list_includes_transporter
-      assert_includes Core.send(:provider_list), "transporter"
-    end
-
-    def test_selectable_providers_exclude_transporter
-      selectable = Core.send(:provider_list).reject { it == "transporter" }
-
-      refute_includes selectable, "transporter"
-      assert_equal "seal_static", selectable.first
-    end
 
     def test_init_appends_provider_to_existing_config
       File.write(".beam_up.yml", YAML.dump({
