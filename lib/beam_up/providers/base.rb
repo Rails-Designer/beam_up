@@ -5,6 +5,8 @@ require "beam_up/result"
 module BeamUp
   module Providers
     class Base
+      def self.display_name = name.split("::").last
+
       def initialize(configuration)
         @configuration = configuration
 

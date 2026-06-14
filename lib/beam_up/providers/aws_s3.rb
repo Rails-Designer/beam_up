@@ -5,6 +5,8 @@ require "beam_up/providers/s3_compatible"
 module BeamUp
   module Providers
     class AwsS3 < S3Compatible
+      def self.display_name = "AWS S3"
+
       class Config
         def self.config_keys = %w[access_key secret_key region bucket url]
 
