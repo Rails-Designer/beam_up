@@ -9,6 +9,8 @@ require "tempfile"
 module BeamUp
   module Providers
     class SealStatic < Base
+      def self.display_name = "Seal Static"
+
       BASE_URL = "https://app.sealstatic.com/api"
 
       class Config

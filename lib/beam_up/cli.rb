@@ -31,17 +31,9 @@ module BeamUp
     def init
       provider_name = @arguments.shift&.downcase
 
-      if provider_name.nil? || !PROVIDERS.key?(provider_name)
-        puts "Available providers:"
-
-        PROVIDERS.keys.reject { it == "transporter" }.sort.each { puts "  - #{it}" }
-
-        exit(1)
-      end
-
       path = BeamUp.init!(provider_name)
 
-      puts "Configured #{provider_name} in #{path}"
+      puts "Configuration saved to #{path}"
     rescue ConfigurationError => error
       puts error.message
 
@@ -52,7 +44,7 @@ module BeamUp
       if File.exist?(".beam_up.yml") || File.exist?("config/beam_up.yml")
         deploy
       else
-        puts "No .beam_up.yml found. Run `beam_up init PROVIDER` to get started"
+        puts "No .beam_up.yml found. Run `beam_up init [PROVIDER]` to get started"
         puts
 
         help
@@ -129,7 +121,7 @@ module BeamUp
     def help
       puts <<~HELP
         Usage:
-          beam_up init PROVIDER                 # Initialize config file for provider
+          beam_up init [PROVIDER]               # Initialize config file (interactive if no provider)
           beam_up [FOLDER]                      # Deploy using .beam_up.yml config
           beam_up [FOLDER] --to PROVIDER        # Deploy with provider override
           beam_up [FOLDER] --provider PROVIDER  # Alias for --to

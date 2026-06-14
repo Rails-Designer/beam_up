@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "yaml"
-require "tty-prompt"
+require "beam_up/core/init"
 
 module BeamUp
   class Core
@@ -37,45 +37,6 @@ module BeamUp
         execute! config.after_actions
 
         result
-      end
-
-      def init!(provider, config_file: nil, values: {})
-        raise ConfigurationError, "Unknown provider: #{provider}" unless PROVIDERS.key?(provider)
-
-        config_file ||= ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
-        config_file ||= ".beam_up.yml"
-
-        if File.exist?(config_file)
-          data = YAML.safe_load_file(config_file) || {}
-
-          raise ConfigurationError, "Provider '#{provider}' already configured in #{config_file}" if data.key?(provider)
-        end
-
-        config_keys = PROVIDERS[provider]::Config.config_keys
-
-        if values.empty? && $stdout.tty? && !ENV["TTY_TEST"]
-          prompt = TTY::Prompt.new
-
-          values = config_keys.to_h { |key| [key, prompt.ask("#{key}:") { it.required false }.to_s] }
-        end
-
-        configured_values = config_keys.to_h { [it, values[it].to_s] }
-
-        if File.exist?(config_file)
-          section = YAML.dump({provider => configured_values}, indent: 2, line_width: 80).sub(/^---\n/, "")
-
-          File.write(config_file, File.read(config_file) + "\n" + section)
-        else
-          yaml = YAML.dump({
-            "provider" => provider,
-            "path" => nil,
-            provider => configured_values
-          }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder")
-
-          File.write(config_file, yaml)
-        end
-
-        config_file
       end
 
       private
