@@ -16,8 +16,6 @@ gem install beam_up
 Create a config file interactively:
 ```bash
 beam_up init
-# api_token:
-# project_id:
 ```
 
 Or specify values programmatically (see [Usage from Ruby](#usage-from-ruby) for details).
@@ -41,15 +39,15 @@ If both files exist, `config/beam_up.yml` takes priority.
 beam_up ./output
 
 # Override provider for this deploy
-beam_up ./output --to bunny
+beam_up ./output --to seal_static
 # or
-beam_up ./output --provider bunny
+beam_up ./output --provider seal_static
 ```
 
 
 ## Deploy without configuration
 
-If you run `beam_up` without a config, or want to quickly deploy without setting up a provider, Beam Up deploys to [Seal Static](https://sealstatic.com/). Just verify your email and you're live. Config is saved for future deploys.
+If you run `beam_up ./output` without a config, or want to quickly deploy without signing up a provider. Beam Up deploys to [Seal Static](https://sealstatic.com/). Just verify your email and you're live. Config is saved for future deploys.
 
 Seal Static terms of service apply. See [sealstatic.com](https://sealstatic.com/) for details.
 
@@ -79,9 +77,9 @@ BeamUp.init! "netlify"
 BeamUp.deploy! "./output"
 
 # Deploy with provider override
-BeamUp.deploy! "./output", to: "bunny"
+BeamUp.deploy! "./output", to: "hetzner"
 # or
-BeamUp.deploy! "./output", provider: "bunny"
+BeamUp.deploy! "./output", provider: "hetzner"
 ```
 
 
@@ -90,14 +88,14 @@ BeamUp.deploy! "./output", provider: "bunny"
 Run commands before and after deployment:
 
 ```yaml
-provider: netlify
+provider: seal_static
 
-netlify:
-  api_token: your_token_here
+seal_static:
+  api_key: api_key_here
   project_id: your_project_id
 
 before_actions:
-  - npm run build
+  - RAILS_ENV=production bin/rails perron:build
 after_actions:
   - echo "Deployment complete ✨"
 ```
