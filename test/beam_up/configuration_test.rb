@@ -1,11 +1,22 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "tmpdir"
+require "fileutils"
 
 module BeamUp
   class ConfigurationTest < Minitest::Test
     def setup
       @config = Configuration.new
+      @original_directory = Dir.pwd
+      @temporary_directory = Dir.mktmpdir
+
+      Dir.chdir(@temporary_directory)
+    end
+
+    def teardown
+      Dir.chdir(@original_directory)
+      FileUtils.rm_rf(@temporary_directory)
     end
 
     def test_provider_accessor
@@ -137,6 +148,60 @@ module BeamUp
       @config.timeout = 600
 
       assert_equal 600, @config.timeout
+    end
+
+    def test_create_creates_new_config_file
+      Configuration.create(".beam_up.yml", provider: "seal_static", config: {"api_key" => "sk_test_123"})
+
+      assert File.exist?(".beam_up.yml")
+
+      data = YAML.safe_load_file(".beam_up.yml")
+
+      assert_equal "seal_static", data["provider"]
+      assert_equal "sk_test_123", data["seal_static"]["api_key"]
+      assert_includes File.read(".beam_up.yml"), "# path: ./output"
+    end
+
+    def test_append_sets_provider_when_missing
+      File.write(".beam_up.yml", YAML.dump({
+        "before_actions" => ["echo hello"],
+        "after_actions" => ["echo bye"]
+      }))
+
+      Configuration.append(".beam_up.yml", provider: "seal_static", config: {"api_key" => "sk_test_123"})
+
+      data = YAML.safe_load_file(".beam_up.yml")
+
+      assert_equal "seal_static", data["provider"]
+      assert_equal "sk_test_123", data["seal_static"]["api_key"]
+      assert_equal ["echo hello"], data["before_actions"]
+      assert_equal ["echo bye"], data["after_actions"]
+    end
+
+    def test_append_preserves_existing_provider
+      File.write(".beam_up.yml", YAML.dump({
+        "provider" => "netlify",
+        "before_actions" => ["echo hello"]
+      }))
+
+      Configuration.append(".beam_up.yml", provider: "seal_static", config: {"api_key" => "sk_test_123"})
+
+      data = YAML.safe_load_file(".beam_up.yml")
+
+      assert_equal "netlify", data["provider"]
+      assert_equal "sk_test_123", data["seal_static"]["api_key"]
+      assert_equal ["echo hello"], data["before_actions"]
+    end
+
+    def test_append_preserves_path_comment
+      File.write(".beam_up.yml", YAML.dump({
+        "provider" => "netlify",
+        "path" => nil
+      }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder"))
+
+      Configuration.append(".beam_up.yml", provider: "seal_static", config: {"api_key" => "sk_test_123"})
+
+      assert_includes File.read(".beam_up.yml"), "# path: ./output"
     end
   end
 end

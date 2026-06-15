@@ -36,7 +36,11 @@ module BeamUp
 
         configured = keys.to_h { [it, values[it].to_s] }
 
-        File.exist?(@config_file) ? append(configured) : create(configured)
+        if File.exist?(@config_file)
+          Configuration.append(@config_file, provider: @provider, config: configured)
+        else
+          Configuration.create(@config_file, provider: @provider, config: configured)
+        end
 
         @config_file
       end
@@ -63,26 +67,10 @@ module BeamUp
         (YAML.safe_load_file(@config_file) || {}).key?(@provider)
       end
 
-      def append(configuration)
-        section = YAML.dump({@provider => configuration}, indent: 2, line_width: 80).sub(/^---\n/, "")
-
-        File.write(@config_file, File.read(@config_file) + "\n" + section)
-      end
-
-      def create(configuration)
-        yaml = YAML.dump({
-          "provider" => @provider,
-          "path" => nil,
-          @provider => configuration
-        }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder")
-
-        File.write(@config_file, yaml)
-      end
-
       def display_name(key)
         name = PROVIDERS[key].display_name
 
-        key == "seal_static" ? "#{name} (recommended)" : name
+        (key == "seal_static") ? "#{name} (recommended)" : name
       end
     end
   end

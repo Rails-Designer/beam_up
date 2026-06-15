@@ -7,8 +7,7 @@ module BeamUp
     DEFAULT_TIMEOUT = 300  # 5 minutes
 
     def initialize
-      @providers = {}
-      @timeout = DEFAULT_TIMEOUT
+      @providers, @timeout = {}, DEFAULT_TIMEOUT
     end
 
     def self.with(options)
@@ -16,6 +15,27 @@ module BeamUp
         config.provider = options[:provider]
         config.provider_config.with(options)
       end
+    end
+
+    def self.create(path, provider:, config:)
+      yaml = YAML.dump({
+        "provider" => provider,
+        "path" => nil,
+        provider => config
+      }, indent: 2, line_width: 80).gsub(/^path:$/, "# path: ./output # uncomment to set a default folder")
+
+      File.write(path, yaml)
+    end
+
+    def self.append(path, provider:, config:)
+      content = File.read(path).sub(/\A---\n/, "")
+      data = YAML.safe_load(content) || {}
+
+      unless data.key?("provider")
+        content = "provider: #{provider}\n#{content}"
+      end
+
+      File.write(path, content.rstrip + "\n" + "#{provider}:\n#{config.map { |key, value| "  #{key}: #{value}" }.join("\n")}\n")
     end
 
     def provider_config
