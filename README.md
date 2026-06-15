@@ -15,7 +15,7 @@ gem install beam_up
 
 Create a config file interactively:
 ```bash
-beam_up init netlify
+beam_up init
 # api_token:
 # project_id:
 ```
@@ -45,6 +45,13 @@ beam_up ./output --to bunny
 # or
 beam_up ./output --provider bunny
 ```
+
+
+## Deploy without configuration
+
+If you run `beam_up` without a config, or want to quickly deploy without setting up a provider, Beam Up deploys to [Seal Static](https://sealstatic.com/). Just verify your email and you're live. Config is saved for future deploys.
+
+Seal Static terms of service apply. See [sealstatic.com](https://sealstatic.com/) for details.
 
 
 ## Supported providers

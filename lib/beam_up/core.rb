@@ -2,6 +2,7 @@
 
 require "yaml"
 require "beam_up/core/init"
+require "beam_up/core/deploy"
 
 module BeamUp
   class Core
@@ -17,29 +18,49 @@ module BeamUp
           custom_path = config_file || @config_file || ((@configuration&.config_file && File.exist?(@configuration.config_file)) ? @configuration.config_file : nil)
           config = custom_path ? configuration_file(custom_path) : configuration_file
 
-          config || raise(ConfigurationError, "No .beam_up.yml found. Run `beam_up init PROVIDER` to create one.")
+          config || raise(ConfigurationError, "No configuration found. Run `beam_up init` to create one.")
         end
       end
 
       def deploy!(path = nil, provider: nil, config_file: nil)
-        config = configuration(config_file: config_file)
+        config = config(path, provider, config_file)
         config.provider = provider if provider
-
-        deploy_path = path || config.path || raise(ConfigurationError, "No path specified")
-
-        config.validate!
 
         execute! config.before_actions
 
-        provider_class = PROVIDERS[config.provider.to_s] || raise(ConfigurationError, "Unknown provider: #{config.provider}")
-        result = provider_class.new(config.provider_config).deploy! deploy_path
-
-        execute! config.after_actions
-
-        result
+        Core::Deploy.call(config, path).tap do
+          execute! config.after_actions
+        end
       end
 
       private
+
+      def config(path, provider, config_file)
+        config = load!(config_file)
+
+        return config if config&.provider
+
+        if path && provider.nil?
+          PROVIDERS["seal_static"].onboarding_init!(config_file: config_file)
+
+          config = load!(config_file)
+          raise ConfigurationError, "Failed to create configuration after onboarding" if config.nil?
+
+          config
+        else
+          raise ConfigurationError, "No configuration found. Run `beam_up init` to create one."
+        end
+      end
+
+      def load!(config_file)
+        if config_file
+          configuration_file(config_file)
+        elsif @config_file
+          configuration_file(@config_file)
+        else
+          configuration_file
+        end
+      end
 
       def configuration_file(custom_path = nil)
         file = custom_path || ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
