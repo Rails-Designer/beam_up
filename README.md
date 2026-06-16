@@ -47,7 +47,7 @@ beam_up ./output --provider seal_static
 
 ## Deploy without configuration
 
-If you run `beam_up ./output` without a config, or want to quickly deploy without signing up a provider. Beam Up deploys to [Seal Static](https://sealstatic.com/). Just verify your email and you're live. Config is saved for future deploys.
+If you run `beam_up ./output` without a config, or want to quickly deploy without signing up for a provider. Beam Up deploys to [Seal Static](https://sealstatic.com/). Just verify your email and you're live. Config is saved for future deploys.
 
 Seal Static terms of service apply. See [sealstatic.com](https://sealstatic.com/) for details.
 
