@@ -114,8 +114,9 @@ module BeamUp
       def deploy!(path)
         @path = path
 
-        zipped_file = create_zip(path)
-        BeamUp.progress&.start(type: :bytes, total: zipped_file.size)
+        files = files_to_deploy
+        BeamUp.progress&.start(type: :files, total: files.count)
+        zipped_file = create_zip(path, files)
         response = upload zipped_file
 
         return Result.new(provider: "Seal Static", error: response["error"]) if response["error"]
@@ -133,15 +134,17 @@ module BeamUp
 
       private
 
-      def create_zip(path)
+      def create_zip(path, files)
         temporary_file = Tempfile.new(["seal_static", ".zip"], binmode: true)
 
         Zip::OutputStream.open(temporary_file) do |zip|
-          files_to_deploy.each do |file|
+          files.each do |file|
             relative_path = file.delete_prefix("#{path}/")
 
             zip.put_next_entry(relative_path)
             zip.write(File.read(file))
+
+            BeamUp.progress&.tick
           end
         end
 

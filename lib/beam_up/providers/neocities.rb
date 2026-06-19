@@ -54,8 +54,11 @@ module BeamUp
 
         form_data = files_to_deploy.map do |file|
           relative_path = file.delete_prefix("#{@path}/")
+          content = File.read(file)
 
-          [relative_path, File.read(file)]
+          BeamUp.progress&.tick
+
+          [relative_path, content]
         end
 
         request.set_form(form_data, "multipart/form-data")

@@ -64,7 +64,7 @@ module BeamUp
     end
 
     def stop_render
-      $stdout.write("\r#{" " * 80}\r")
+      $stdout.write("\n")
 
       $stdout.flush
     end
