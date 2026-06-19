@@ -29,8 +29,9 @@ module BeamUp
       def deploy!(path)
         @path = path
 
-        zipped_file = create_zip path
-        BeamUp.progress&.start(type: :bytes, total: zipped_file.size)
+        files = files_to_deploy
+        BeamUp.progress&.start(type: :files, total: files.count)
+        zipped_file = create_zip(path, files)
         response = upload zipped_file
 
         Result.new(
@@ -47,16 +48,16 @@ module BeamUp
 
       private
 
-      def create_zip(path)
+      def create_zip(path, files)
         temp = Tempfile.new(["statichost", ".zip"], binmode: true)
 
         Zip::OutputStream.open(temp) do |zip|
-          Dir.glob("#{path}/**/*").each do |file|
-            next unless File.file?(file)
-
+          files.each do |file|
             relative_path = file.delete_prefix("#{path}/")
             zip.put_next_entry(relative_path)
             zip.write(File.read(file))
+
+            BeamUp.progress&.tick
           end
         end
 
