@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "erb"
+
 module BeamUp
   class Configuration
     attr_accessor :provider, :path, :before_actions, :after_actions, :timeout, :config_file
@@ -28,8 +30,13 @@ module BeamUp
     end
 
     def self.append(path, provider:, config:)
-      content = File.read(path).sub(/\A---\n/, "")
-      data = YAML.safe_load(content) || {}
+      raw = File.read(path)
+      content = raw.sub(/\A---\n/, "")
+      data = if path.end_with?(".yml.erb")
+        YAML.safe_load(ERB.new(content, trim_mode: "-").result) || {}
+      else
+        YAML.safe_load(content) || {}
+      end
 
       unless data.key?("provider")
         content = "provider: #{provider}\n#{content}"

@@ -64,7 +64,7 @@ module BeamUp
       def configured?
         return false unless File.exist?(@config_file)
 
-        (YAML.safe_load_file(@config_file) || {}).key?(@provider)
+        (Core.yaml_load(@config_file) || {}).key?(@provider)
       end
 
       def display_name(key)
