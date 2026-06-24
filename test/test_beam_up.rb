@@ -80,6 +80,25 @@ class BeamUpTest < Minitest::Test
     assert_equal "bunny", BeamUp.configuration.provider
   end
 
+  def test_prefers_yml_over_yml_erb_when_both_exist
+    File.write(".beam_up.yml", YAML.dump({"provider" => "netlify", "netlify" => {"api_token" => "yml_token"}}))
+    File.write(".beam_up.yml.erb", "provider: seal_static\nseal_static:\n  api_key: erb_key\n")
+
+    config = BeamUp.configuration
+
+    assert_equal "netlify", config.provider
+    assert_equal "yml_token", config.netlify.api_token
+  end
+
+  def test_uses_yml_erb_when_yml_does_not_exist
+    File.write(".beam_up.yml.erb", "provider: seal_static\nseal_static:\n  api_key: <%= 'erb' + '_key' %>\n")
+
+    config = BeamUp.configuration
+
+    assert_equal "seal_static", config.provider
+    assert_equal "erb_key", config.seal_static.api_key
+  end
+
   def test_configure_yields_config
     File.write(".beam_up.yml", YAML.dump({
       "provider" => "netlify",
@@ -268,5 +287,37 @@ class BeamUpTest < Minitest::Test
     assert beamed.success?
     assert_equal "Transporter", beamed.provider
     assert File.exist?("./beamed/index.html")
+  end
+
+  def test_yaml_load_parses_yml_file
+    File.write("config.yml", YAML.dump({"key" => "value"}))
+
+    result = BeamUp::Core.yaml_load("config.yml")
+
+    assert_equal({"key" => "value"}, result)
+  end
+
+  def test_yaml_load_processes_erb_in_yml_erb_file
+    File.write("config.yml.erb", "key: <%= 'hello' + '_world' %>")
+
+    result = BeamUp::Core.yaml_load("config.yml.erb")
+
+    assert_equal({"key" => "hello_world"}, result)
+  end
+
+  def test_yaml_load_parses_yml_erb_file_without_erb_tags
+    File.write("config.yml.erb", YAML.dump({"key" => "value"}))
+
+    result = BeamUp::Core.yaml_load("config.yml.erb")
+
+    assert_equal({"key" => "value"}, result)
+  end
+
+  def test_yaml_load_does_not_process_erb_in_yml_file
+    File.write("config.yml", "key: <%= 'hello' %>")
+
+    result = BeamUp::Core.yaml_load("config.yml")
+
+    assert_equal({"key" => "<%= 'hello' %>"}, result)
   end
 end

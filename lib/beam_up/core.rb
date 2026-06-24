@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "erb"
 require "yaml"
 require "beam_up/core/init"
 require "beam_up/core/deploy"
@@ -33,6 +34,10 @@ module BeamUp
         end
       end
 
+      def yaml_load(path)
+        YAML.safe_load(path.end_with?(".yml.erb") ? ERB.new(File.read(path), trim_mode: "-").result : File.read(path))
+      end
+
       private
 
       def config(path, provider, config_file)
@@ -63,11 +68,11 @@ module BeamUp
       end
 
       def configuration_file(custom_path = nil)
-        file = custom_path || ["config/beam_up.yml", ".beam_up.yml"].find { File.exist?(it) }
+        file = custom_path || ["config/beam_up.yml", "config/beam_up.yml.erb", ".beam_up.yml", ".beam_up.yml.erb"].find { File.exist?(it) }
 
         return nil unless file && File.exist?(file)
 
-        data = YAML.safe_load_file(file)
+        data = yaml_load(file)
 
         Configuration.new.tap do |config|
           config.provider = data["provider"]
