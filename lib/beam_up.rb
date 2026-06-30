@@ -14,6 +14,7 @@ module BeamUp
     "aws_s3" => Providers::AwsS3,
     "bunny" => Providers::Bunny,
     "digital_ocean_spaces" => Providers::DigitalOceanSpaces,
+    "github_pages" => Providers::GitHubPages,
     "hetzner" => Providers::Hetzner,
     "neocities" => Providers::Neocities,
     "netlify" => Providers::Netlify,
