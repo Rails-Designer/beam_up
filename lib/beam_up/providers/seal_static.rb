@@ -6,10 +6,13 @@ require "json"
 require "zip"
 require "tempfile"
 require "tty-prompt"
+require "beam_up/retryable"
 
 module BeamUp
   module Providers
     class SealStatic < Base
+      include Retryable
+
       def self.display_name = "Seal Static"
 
       BASE_URL = "https://app.sealstatic.com/api"
@@ -155,16 +158,16 @@ module BeamUp
       def upload(zipped_file)
         uri = URI("#{BASE_URL}/uploads")
 
-        boundary = "----BeamUpBoundary#{SecureRandom.hex(16)}"
-        body = multipart_body(boundary, zipped_file)
+        response = retryable_request(uri) do
+          boundary = "----BeamUpBoundary#{SecureRandom.hex(16)}"
 
-        request = Net::HTTP::Post.new(uri)
-        request["Authorization"] = "Bearer #{@configuration.api_key}"
-        request["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
-        request["Accept"] = "application/json"
-        request.body = body
-
-        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(request) }
+          Net::HTTP::Post.new(uri).tap do |request|
+            request["Authorization"] = "Bearer #{@configuration.api_key}"
+            request["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
+            request["Accept"] = "application/json"
+            request.body = multipart_body(boundary, zipped_file)
+          end
+        end
 
         case response.code.to_i
         when 200..299

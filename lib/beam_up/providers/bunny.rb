@@ -2,10 +2,13 @@
 
 require "net/http"
 require "digest"
+require "beam_up/retryable"
 
 module BeamUp
   module Providers
     class Bunny < Base
+      include Retryable
+
       class Config
         def self.config_keys = %w[storage_zone_password storage_zone_name region]
 
@@ -54,15 +57,11 @@ module BeamUp
         relative_path = file.delete_prefix("#{@path}/")
         uri = URI("https://#{storage_host}/#{@configuration.storage_zone_name}/#{relative_path}")
 
-        request = Net::HTTP::Put.new(uri)
-        request["AccessKey"] = @configuration.storage_zone_password
-
-        File.open(file, "rb") do |file|
-          request.body = file.read
-        end
-
-        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-          http.request(request)
+        response = retryable_request(uri) do
+          Net::HTTP::Put.new(uri).tap do |request|
+            request["AccessKey"] = @configuration.storage_zone_password
+            request.body = File.read(file)
+          end
         end
 
         return if response.code.to_i == 201
